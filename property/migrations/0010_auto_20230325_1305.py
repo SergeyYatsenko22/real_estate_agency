@@ -6,15 +6,13 @@ import phonenumbers
 
 def create_pure_phone (apps, schema_editor):
     Flat = apps.get_model("property", "Flat")
-    for flat in Flat.objects.filter(owners_phonenumber='+70000000000'):
+    for flat in Flat.objects.all():
         if phonenumbers.is_possible_number(phonenumbers.parse(flat.owners_phonenumber,"RU")) and \
                 phonenumbers.is_valid_number(phonenumbers.parse(flat.owners_phonenumber,
                                 "RU")):
             flat.owner_pure_phone = phonenumbers.format_number(phonenumbers.parse(flat.owners_phonenumber,
                                 "RU"), phonenumbers.PhoneNumberFormat.E164)
             flat.save()
-
-
 
 
 class Migration(migrations.Migration):
