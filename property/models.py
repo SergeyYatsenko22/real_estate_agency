@@ -50,6 +50,8 @@ class Flat(models.Model):
 
     new_building = models.BooleanField('Новостройки', db_index=True, null=True)
 
+    likes = models.ManyToManyField(User, related_name="liked_flats", null=True, blank = True, verbose_name="Кто лайкнул")
+
     def __str__(self):
         return f'{self.town}, {self.address} ({self.price}р.)'
 
@@ -59,6 +61,5 @@ class Complaint(models.Model):
     complaint_text = models.TextField('Текст жалобы', blank=True)
 
 
-
     def __str__(self):
-        return f'{self.complaint_text}'
+        return self.complaint_text
