@@ -1,42 +1,76 @@
-from django.db import models  # noqa F401
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+from phonenumber_field.modelfields import PhoneNumberField
 
+class Flat(models.Model):
+    owner = models.CharField('ФИО владельца', max_length=200)
+    owners_phonenumber = models.CharField('Номер владельца', max_length=20)
+    owner_pure_phone = PhoneNumberField("Нормализованный номер телефона", null=True, blank=True, region="RU")
+    created_at = models.DateTimeField(
+        'Когда создано объявление',
+        default=timezone.now,
+        db_index=True)
 
-class Pokemon(models.Model):
-    title = models.CharField(max_length=200,
-                             verbose_name="Имя покемона")
-    image = models.ImageField(upload_to="pokemon_images", blank=True,
-                              verbose_name="Изображение покемона")
-    title_eng = models.CharField(max_length=200, blank=True,
-                                 verbose_name="Имя покемона по-английски")
-    title_jp = models.CharField(max_length=200, blank=True,
-                                verbose_name="Имя покемона по-японски")
-    description = models.TextField(blank=True,
-                                   verbose_name="Описание покемона")
-    previous_evolution = models.ForeignKey("self", null=True, blank=True,
-                                           related_name='next_evolutions',
-                                           verbose_name="Прошлая эволюция",
-                                           on_delete=models.SET_NULL)
+    # owned_by = models.ManyToManyField("Owner", related_name="owned_flats")
+
+    description = models.TextField('Текст объявления', blank=True)
+    price = models.IntegerField('Цена квартиры', db_index=True)
+
+    town = models.CharField(
+        'Город, где находится квартира',
+        max_length=50,
+        db_index=True)
+    town_district = models.CharField(
+        'Район города, где находится квартира',
+        max_length=50,
+        blank=True,
+        help_text='Чертаново Южное')
+    address = models.TextField(
+        'Адрес квартиры',
+        help_text='ул. Подольских курсантов д.5 кв.4')
+    floor = models.CharField(
+        'Этаж',
+        max_length=3,
+        help_text='Первый этаж, последний этаж, пятый этаж')
+
+    rooms_number = models.IntegerField(
+        'Количество комнат в квартире',
+        db_index=True)
+    living_area = models.IntegerField(
+        'количество жилых кв.метров',
+        null=True,
+        blank=True,
+        db_index=True)
+
+    has_balcony = models.NullBooleanField('Наличие балкона', db_index=True)
+    active = models.BooleanField('Активно-ли объявление', db_index=True)
+    construction_year = models.IntegerField(
+        'Год постройки здания',
+        null=True,
+        blank=True,
+        db_index=True)
+
+    new_building = models.BooleanField('Новостройки', db_index=True, null=True)
+
+    likes = models.ManyToManyField(User, related_name="liked_flats", blank = True, verbose_name="Кто лайкнул")
 
     def __str__(self):
-        return self.title
+        return f'{self.town}, {self.address} ({self.price}р.)'
 
-
-class PokemonEntity(models.Model):
-    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, verbose_name="Имя покемона",
-                                related_name="entities")
-    lat = models.FloatField(null=True, verbose_name="Широта")
-    lon = models.FloatField(null=True, verbose_name="Долгота")
-    appeared_at = models.DateTimeField(null=True, blank=True, verbose_name="Время появления покемона")
-    disappeared_at = models.DateTimeField(null=True, blank=True, verbose_name="Время изчезновения покемона")
-    level = models.IntegerField(null=True, blank=True, verbose_name="Уровень покемона")
-    health = models.IntegerField(null=True, blank=True, verbose_name="Здоровье покемона")
-    strength = models.IntegerField(null=True, blank=True, verbose_name="Сила покемона")
-    defence = models.IntegerField(null=True, blank=True, verbose_name="Защита покемона")
-    stamina = models.IntegerField(null=True, blank=True, verbose_name="Выносливость покемона")
+class Complaint(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Кто жаловался")
+    complaint = models.ForeignKey(Flat, on_delete=models.CASCADE, verbose_name="Квартира на которую жаловались")
+    complaint_text = models.TextField('Текст жалобы', blank=True)
 
     def __str__(self):
-        return self.pokemon.title
+        return self.complaint_text
 
-    class Meta:
-        verbose_name = "Pokemon entity"
-        verbose_name_plural = "Pokemon entities"
+class Owner(models.Model):
+    owner_name = models.CharField('ФИО владельца', max_length=200)
+    owners_phonenumber = models.CharField('Номер владельца', max_length=20)
+    owner_pure_phone = PhoneNumberField("Нормализованный номер телефона", null=True, blank=True, region="RU")
+    flats = models.ManyToManyField("Flat", related_name="flats_by_owner", verbose_name="Квартиры в собственности")
+
+    def __str__(self):
+        return self.owner_name
