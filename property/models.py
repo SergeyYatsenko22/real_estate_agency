@@ -4,9 +4,9 @@ from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
 
 class Flat(models.Model):
-    owner = models.CharField('ФИО владельца', max_length=200)
-    owners_phonenumber = models.CharField('Номер владельца', max_length=20)
-    owner_pure_phone = PhoneNumberField("Нормализованный номер телефона", null=True, blank=True, region="RU")
+    # owner = models.CharField('ФИО владельца', max_length=200)
+    # owners_phonenumber = models.CharField('Номер владельца', max_length=20)
+    # owner_pure_phone = PhoneNumberField("Нормализованный номер телефона", null=True, blank=True, region="RU")
     created_at = models.DateTimeField(
         'Когда создано объявление',
         default=timezone.now,
@@ -67,10 +67,10 @@ class Complaint(models.Model):
         return self.complaint_text
 
 class Owner(models.Model):
-    owner_name = models.CharField('ФИО владельца', max_length=200)
-    owners_phonenumber = models.CharField('Номер владельца', max_length=20)
-    owner_pure_phone = PhoneNumberField("Нормализованный номер телефона", null=True, blank=True, region="RU")
-    flats = models.ManyToManyField("Flat", related_name="flats_by_owner", verbose_name="Квартиры в собственности")
+    owner_name = models.CharField('ФИО владельца', db_index=True, max_length=200)
+    owners_phonenumber = models.CharField('Номер владельца', db_index=True, max_length=20)
+    owner_pure_phone = PhoneNumberField("Нормализованный номер телефона", db_index=True, null=True, blank=True, region="RU")
+    flats = models.ManyToManyField("Flat", related_name="owners", db_index=True, verbose_name="Квартиры в собственности")
 
     def __str__(self):
         return self.owner_name
