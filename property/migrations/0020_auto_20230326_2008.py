@@ -12,10 +12,8 @@ def correspondent_flats_owners (apps, schema_editor):
         owner = Owner.objects.get_or_create(owner_name=owner_name,
                                                     owners_phonenumber=owners_phonenumber)
 
-        # owner[0].flats.set(owner[0])
-
         owner[0].flats.add(flat)
-        owner[0].save()
+        # owner[0].save()
 
 class Migration(migrations.Migration):
 
