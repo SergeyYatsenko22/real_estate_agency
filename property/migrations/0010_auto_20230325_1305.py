@@ -6,7 +6,8 @@ import phonenumbers
 
 def create_pure_phone (apps, schema_editor):
     Flat = apps.get_model("property", "Flat")
-    for flat in Flat.objects.all():
+    flat_set = Flat.objects.all()
+    for flat in flat_set.iterator():
         if phonenumbers.is_possible_number(phonenumbers.parse(flat.owners_phonenumber,"RU")) and \
                 phonenumbers.is_valid_number(phonenumbers.parse(flat.owners_phonenumber,
                                 "RU")):

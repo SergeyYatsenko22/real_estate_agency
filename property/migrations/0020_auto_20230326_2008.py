@@ -3,20 +3,20 @@
 from django.db import migrations
 
 
-def correspondent_flats_owners (apps, schema_editor):
+def correspondent_flats_owners(apps, schema_editor):
     Flat = apps.get_model("property", "Flat")
     Owner = apps.get_model("property", "Owner")
-    for flat in Flat.objects.all():
+    flat_set = Flat.objects.all()
+    for flat in flat_set.iterator():
         owner_name = flat.owner
         owners_phonenumber = flat.owners_phonenumber
-        owner = Owner.objects.get_or_create(owner_name=owner_name,
+        name, created = Owner.objects.get_or_create(owner_name=owner_name,
                                                     owners_phonenumber=owners_phonenumber)
 
-        owner[0].flats.add(flat)
-        # owner[0].save()
+        name.flats.add(flat)
+
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('property', '0019_auto_20230326_1603'),
     ]
