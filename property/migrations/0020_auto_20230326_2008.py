@@ -10,10 +10,10 @@ def correspondent_flats_owners(apps, schema_editor):
     for flat in flat_set.iterator():
         owner_name = flat.owner
         owners_phonenumber = flat.owners_phonenumber
-        name, created = Owner.objects.get_or_create(owner_name=owner_name,
+        owner, created = Owner.objects.get_or_create(owner_name=owner_name,
                                                     owners_phonenumber=owners_phonenumber)
 
-        name.flats.add(flat)
+        owner.flats.add(flat)
 
 
 class Migration(migrations.Migration):
